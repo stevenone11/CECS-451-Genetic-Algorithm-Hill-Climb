@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+
+  <div class="border-box-sizing">
+    <div class="container">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&#160;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Parth Chhasatiya</span>
+<span class="c1"># Steven Centeno</span>
+<span class="c1"># Shoraj Manandhar</span>
+
+<span class="kn">import</span> <span class="nn">random</span> <span class="c1"># used for random restart</span>
+<span class="kn">import</span> <span class="nn">time</span> <span class="c1"># used to calculate runtime</span>
+<span class="kn">from</span> <span class="nn">board</span> <span class="kn">import</span> <span class="n">Board</span> <span class="c1"># used to access the Board class and all of its&#39; methods</span>
+
+<span class="c1"># This part of the code is the Hill Climb algorithm. This will solve the five-queens problem by taking in an initial state as input, using the fitness() function to</span>
+<span class="c1"># calculate how many attacking pairs it has, and then moving one of the queens to a different column, one column at a time, comparing the fitness values of the initial</span>
+<span class="c1"># state and the current state to find which column results in the smallest fitness value for that row. It will then do the same for every row until the fitness is 0</span>
+<span class="c1"># or a local maxima is reached, in which case a random restart will occur, starting the algorithm over.</span>
+<span class="k">def</span> <span class="nf">hillClimb</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">testTwo</span><span class="p">,</span> <span class="n">restart</span><span class="p">):</span>
+
+    <span class="n">current</span> <span class="o">=</span> <span class="n">test</span> <span class="c1"># current state of the board</span>
+    <span class="n">current</span><span class="o">.</span><span class="n">fitness</span><span class="p">()</span> <span class="c1"># call this to recalculate the fitness value of the board when a random restart happens</span>
+    <span class="nb">next</span> <span class="o">=</span> <span class="n">testTwo</span> <span class="c1"># next state of the board</span>
+    <span class="c1"># Use a nested for loop in order to iterate through every column in each row, starting with the first row.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">n_queen</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">n_queen</span><span class="p">):</span>
+            <span class="n">currentFit</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">get_fit</span><span class="p">()</span> <span class="c1"># fitness value of the current state</span>
+            <span class="n">currentQueen</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">queens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># queen node from the i&#39;th row of the current board</span>
+            <span class="n">currentQueenCol</span> <span class="o">=</span> <span class="n">currentQueen</span><span class="o">.</span><span class="n">getCol</span><span class="p">()</span> <span class="c1"># get the column the queen of the i&#39;th row is in</span>
+
+            <span class="c1"># If the fitness value of the current state is 0, then that means there are no more attacking pairs in the current state. This will print the number of</span>
+            <span class="c1"># restarts it took to get to the solution and display the matrix of the current state of the board.</span>
+            <span class="k">if</span> <span class="n">currentFit</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of restarts: &quot;</span><span class="p">,</span> <span class="n">restart</span><span class="p">)</span>
+                <span class="n">current</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="k">return</span>
+            <span class="c1"># If the fitness value of the current state is not 0 then move the queen of the i&#39;th row to a new column and call that the next state. Then compare the</span>
+            <span class="c1"># fitness values of the next state and the current state to see whether or not to set the next state as the current state, or keep the current state</span>
+            <span class="c1"># and move the queen to the next column.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If the column of the current queen is the same as the j iterator that means the next state will just be the same as the current state, so continue</span>
+                <span class="c1"># onto the next iteration of j.</span>
+                <span class="k">if</span> <span class="n">currentQueenCol</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Remove the queen from the next state column it is in and move it to the j&#39;th column of the board.</span>
+                    <span class="nb">next</span><span class="o">.</span><span class="n">removeQueen</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">currentQueenCol</span><span class="p">)</span> 
+                    <span class="nb">next</span><span class="o">.</span><span class="n">setQueen</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="nb">next</span><span class="o">.</span><span class="n">fitness</span><span class="p">()</span> <span class="c1"># Calculate the fitness value now that the queen has moved to a new column in the next state.</span>
+                    <span class="n">nextFit</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">get_fit</span><span class="p">()</span>
+                    <span class="c1"># If the fitness value of the next state is smaller than that of the current state, make the next state the current state.</span>
+                    <span class="k">if</span> <span class="n">nextFit</span> <span class="o">&lt;</span> <span class="n">currentFit</span><span class="p">:</span>
+                        <span class="n">current</span> <span class="o">=</span> <span class="nb">next</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">continue</span>
+    <span class="c1"># This section of the code will utilize the random restart function that is necessary when a local maxima is reached and the algorithm cannot find new queen</span>
+    <span class="c1"># placements which result in a lower fitness value on the board</span>
+    <span class="n">randomProb</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">current</span> <span class="o">==</span> <span class="n">test</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">randomProb</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+            <span class="n">restartBoard</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">restartBoard</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">next</span><span class="p">)</span>
+            <span class="n">hillClimb</span><span class="p">(</span><span class="n">restartBoard</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="n">restart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hillClimb</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="n">restart</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hillClimb</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">next</span><span class="p">,</span> <span class="n">restart</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&#160;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">test</span><span class="o">.</span><span class="n">fitness</span><span class="p">()</span>
+    
+    <span class="n">testTwo</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">test</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">testTwo</span><span class="p">)</span>
+
+    <span class="n">restarts</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># number of restarts</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="c1"># used at the end of the program to calculate the total runtime of the algorithm</span>
+    <span class="n">hillClimb</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">testTwo</span><span class="p">,</span> <span class="n">restarts</span><span class="p">)</span> <span class="c1"># pass in the board as the current state and the copy of the board as the next state</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running time: </span><span class="si">{0:.2f}</span><span class="s2"> ms&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="mi">1000</span><span class="o">*</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))))</span> <span class="c1"># multiply by 1000 to get time in milliseconds</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Number of restarts:  80
+[[0 0 0 1 0]
+ [1 0 0 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 1]
+ [0 1 0 0 0]]
+Fitness:  0
+Running time: 302.28 ms
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&#160;[&#160;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    </div>
+  </div>
+
+
+ 
+
+
+
+<script type="text/javascript" src="/d2l/common/math/MathML.js?v=20.20.9.24432-155 "></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { D2LMathML.DesktopInit('https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=MML_HTMLorMML','https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML','130'); });</script></body></html>

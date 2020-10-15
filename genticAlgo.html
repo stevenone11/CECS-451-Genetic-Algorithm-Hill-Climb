@@ -1,0 +1,351 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+
+  <div class="border-box-sizing">
+    <div class="container">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&#160;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># steven centeno</span>
+<span class="c1"># Shoraj Manandhar</span>
+<span class="c1"># Parth Chhasatiya</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">board</span> <span class="kn">import</span> <span class="n">Board</span>
+
+<span class="c1"># we will have a state class that inculdes each staes board, encoded string, fitness value (of </span>
+<span class="c1"># non attacking pairs) as well as its normal value</span>
+<span class="c1"># the encoded string, fitness and nomal value all have setters and getters for their </span>
+<span class="c1"># value to allow for easy access and change to the variables, the board must be accessed manually</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">board</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">board</span> <span class="o">=</span> <span class="n">board</span>
+
+    <span class="k">def</span> <span class="nf">setEncodedStr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enc</span> <span class="o">=</span> <span class="n">enc</span>
+    
+    <span class="k">def</span> <span class="nf">getEncodedStr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enc</span>
+        
+    <span class="k">def</span> <span class="nf">setFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setNormVal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normVal</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normVal</span> <span class="o">=</span> <span class="n">normVal</span>
+
+    <span class="k">def</span> <span class="nf">getNormVal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normVal</span>
+
+
+<span class="c1"># initial input should look something like geneticAlgo([], 0, 8, 5)</span>
+<span class="c1"># runs the geneti algorithm given the states</span>
+<span class="c1"># input - list of state object, # of times repeated(generation), n # of states, q # of queens, probability of restarting , total restarts so far</span>
+<span class="c1"># output - board pinted, the running time, # of restarts</span>
+<span class="k">def</span> <span class="nf">geneticAlgo</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">restProb</span><span class="p">,</span> <span class="n">totalRestarts</span><span class="p">):</span>
+
+    <span class="c1"># if the # of states in the list is 0, encode the states</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">boardN</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="c1"># create board with q queens</span>
+            <span class="n">boardN</span><span class="o">.</span><span class="n">nonFitness</span><span class="p">()</span>
+            <span class="n">encodedState</span> <span class="o">=</span> <span class="n">encode</span><span class="p">(</span><span class="n">boardN</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="c1"># get the encoded string</span>
+            <span class="n">nState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">boardN</span><span class="p">)</span> <span class="c1"># initialize state with the board </span>
+            <span class="n">nState</span><span class="o">.</span><span class="n">setEncodedStr</span><span class="p">(</span><span class="n">encodedState</span><span class="p">)</span> <span class="c1"># give the state its encoded string</span>
+            <span class="n">nState</span><span class="o">.</span><span class="n">setFit</span><span class="p">(</span><span class="n">boardN</span><span class="o">.</span><span class="n">get_nonFit</span><span class="p">())</span> <span class="c1"># since we are searching for non fitness values</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nState</span><span class="p">)</span> <span class="c1"># give empty list the nth state with its board and encoded string</span>
+
+    <span class="c1"># estimates which state has the highest non attacking pair and returns randomly</span>
+    <span class="c1"># states equal to the states given, allowing for repeated states</span>
+    <span class="n">newStateList</span> <span class="o">=</span> <span class="n">selection</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="c1"># will first randomly select between the states based on their normal value percentage</span>
+    <span class="n">pairAndCross</span> <span class="o">=</span> <span class="n">pairing</span><span class="p">(</span><span class="n">newStateList</span><span class="p">)</span> <span class="c1"># will then pair, swap and mutate elements in the encoded strings of the states</span>
+    <span class="n">decodedStates</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">pairAndCross</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">totalRestarts</span><span class="p">)</span> <span class="c1"># will decode the changes in the string onto the board and if the solution is found, exit</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">decodedStates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> <span class="c1"># exits the program when the solution is found</span>
+        <span class="k">return</span>
+
+    <span class="n">lastStates</span><span class="p">,</span> <span class="n">resetProb</span><span class="p">,</span> <span class="n">totalRestartsUpdated</span> <span class="o">=</span> <span class="n">randomRestart</span><span class="p">(</span><span class="n">decodedStates</span><span class="p">,</span> <span class="n">restProb</span><span class="p">,</span> <span class="n">totalRestarts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">geneticAlgo</span><span class="p">(</span><span class="n">lastStates</span><span class="p">,</span> <span class="n">restart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">resetProb</span><span class="p">,</span> <span class="n">totalRestartsUpdated</span><span class="p">)</span> <span class="c1"># this will recursively call</span>
+
+
+<span class="c1"># takes in a board class and convets it to a string</span>
+<span class="c1"># input - board class, n # of queens</span>
+<span class="c1"># output- the encoded string representing the board</span>
+<span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">board</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="n">myMap</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">get_map</span><span class="p">()</span>
+    <span class="n">encodedStr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">myMap</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">encodedStr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">encodedStr</span>
+
+
+<span class="c1"># gets a list of states, gets their fitness value, and computes each</span>
+<span class="c1"># normal value (probability of selection) then selects randomly between</span>
+<span class="c1"># the states up to the number of states that exist in the array (the states</span>
+<span class="c1"># can have repeating states selected)</span>
+<span class="c1"># input - the array holding the states</span>
+<span class="c1"># output - the states that were randomly selected between the given input</span>
+<span class="k">def</span> <span class="nf">selection</span><span class="p">(</span><span class="n">lState</span><span class="p">):</span>
+    
+    <span class="n">totalVal</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># keep track of the total fitness</span>
+    
+    <span class="c1"># goes through each state to add its fitness to total </span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lState</span><span class="p">)):</span>
+        <span class="n">totalVal</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lState</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getFit</span><span class="p">())</span>
+
+    <span class="c1"># calculates the normal value per state </span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lState</span><span class="p">)):</span>
+        <span class="n">curFit</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lState</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getFit</span><span class="p">())</span>
+        <span class="n">lState</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setNormVal</span><span class="p">(</span><span class="n">curFit</span><span class="o">/</span><span class="n">totalVal</span><span class="p">)</span>
+    
+    <span class="c1"># selects randomly one of the states and saves it to a new list</span>
+    <span class="c1"># repeats this up to the number of states in the original list</span>
+    <span class="n">numOfRandomSelec</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lState</span><span class="p">)</span>
+    <span class="n">newStates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numOfRandomSelec</span><span class="p">):</span> <span class="c1"># get n number of statesto give to new list</span>
+        <span class="n">randomSelec</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># random number from 0 - 1</span>
+        <span class="n">totalnormVal</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># the total current normal value saved while looping</span>
+        <span class="n">alreadySelected</span> <span class="o">=</span> <span class="kc">False</span> 
+
+        <span class="c1"># how we get the random number from the list is as such:</span>
+        <span class="c1"># get the random generated number ex: 0.7 and loop through the list</span>
+        <span class="c1"># as it loops through the list, it will get each elements normal value</span>
+        <span class="c1"># since the list will look somethat like that [[.02],[.2],[.3],[.3],[.18]]</span>
+        <span class="c1"># we need to save the total normal value as we go through the list</span>
+        <span class="c1"># so first element .02 is less than .7, we will continue, next element is </span>
+        <span class="c1"># .2 which is added to the total to get .22 still less than .7 continue, </span>
+        <span class="c1"># .3 + .22 = .52 &lt; .7, continue so now .3 + .52 = .82 which is greater than .7, this means it is</span>
+        <span class="c1"># the number we selected  </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lState</span><span class="p">)):</span>
+            <span class="n">currentNorm</span> <span class="o">=</span> <span class="n">lState</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getNormVal</span><span class="p">()</span>
+            <span class="n">totalnormVal</span> <span class="o">+=</span> <span class="n">currentNorm</span> <span class="c1"># keeping track of the current total normal value</span>
+
+            <span class="k">if</span> <span class="n">randomSelec</span> <span class="o">&lt;</span> <span class="n">totalnormVal</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">alreadySelected</span><span class="p">):</span> 
+                <span class="n">newStates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lState</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># saves the new state that was randomly selected</span>
+                <span class="n">alreadySelected</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="n">newStates</span>
+
+
+<span class="c1"># takes in an array of the states and does the following:</span>
+<span class="c1"># 1. shuffles the array so that 2 nearby states can be randomly paried with one another</span>
+<span class="c1"># 2. swaps elements in the paired encoded states by placing them in the swap function</span>
+<span class="c1"># 3. mutates a random element fom the encoded state twice for more diverse solutions</span>
+<span class="c1"># input - all the states in an array</span>
+<span class="c1"># output - all the states in the array having been paired, corssovered and mutated</span>
+<span class="k">def</span> <span class="nf">pairing</span><span class="p">(</span><span class="n">states</span><span class="p">):</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="c1"># shuffle the states in order to randomly pair the arrays selected</span>
+    <span class="n">sizeBoard</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">n_queen</span> <span class="c1"># gets the size of q queens for later in the code</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># loops through the states to pair the states 2 at a time</span>
+    <span class="k">while</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">):</span>
+        <span class="n">encodedStr1</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">getEncodedStr</span><span class="p">()</span> <span class="c1"># get the encoded of the first and second state</span>
+        <span class="n">encodedStr2</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getEncodedStr</span><span class="p">()</span>
+        <span class="n">str1</span><span class="p">,</span> <span class="n">str2</span> <span class="o">=</span> <span class="n">crossover</span><span class="p">(</span><span class="n">encodedStr1</span><span class="p">,</span> <span class="n">encodedStr2</span><span class="p">)</span> <span class="c1"># cross over the pairs</span>
+        <span class="n">str1</span> <span class="o">=</span> <span class="n">mutation</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">sizeBoard</span><span class="p">)</span> <span class="c1"># now randomly mutate the pairs individually</span>
+        <span class="n">str2</span> <span class="o">=</span> <span class="n">mutation</span><span class="p">(</span><span class="n">str2</span><span class="p">,</span> <span class="n">sizeBoard</span><span class="p">)</span> 
+        <span class="n">str1</span> <span class="o">=</span> <span class="n">mutation</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">sizeBoard</span><span class="p">)</span> <span class="c1"># now we again mutate one element from the pairs for more diverse solutions</span>
+        <span class="n">str2</span> <span class="o">=</span> <span class="n">mutation</span><span class="p">(</span><span class="n">str2</span><span class="p">,</span> <span class="n">sizeBoard</span><span class="p">)</span> 
+        <span class="n">states</span><span class="p">[</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">setEncodedStr</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span> <span class="c1"># overwrite the changed encoded strings to teh newer versions</span>
+        <span class="n">states</span><span class="p">[</span><span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEncodedStr</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">+=</span> <span class="mi">2</span>
+    
+    <span class="k">return</span> <span class="n">states</span>
+
+
+<span class="c1"># gets two encoded strings and crosses them over through a randomly selected pivot</span>
+<span class="c1"># input - two encoded strings</span>
+<span class="c1"># output- the same two encoded strings having been crossed over</span>
+<span class="k">def</span> <span class="nf">crossover</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">):</span>
+    <span class="n">randIndex</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># randomly get an index to cross over the arrays</span>
+    <span class="n">nextS1</span> <span class="o">=</span> <span class="n">str1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">randIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">str2</span><span class="p">[</span><span class="n">randIndex</span><span class="p">:]</span> <span class="c1"># crosses over the arrays with one another</span>
+    <span class="n">nextS2</span> <span class="o">=</span> <span class="n">str2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">randIndex</span><span class="p">]</span> <span class="o">+</span> <span class="n">str1</span><span class="p">[</span><span class="n">randIndex</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">nextS1</span><span class="p">,</span> <span class="n">nextS2</span>
+
+
+<span class="c1"># takes in an encoded string and mutates one element in the string by a 95% chance</span>
+<span class="c1"># input- the encoded string and size of the board</span>
+<span class="c1"># output- the mutated string</span>
+<span class="k">def</span> <span class="nf">mutation</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+
+    <span class="c1"># needs a probability of mutating before deciding to mutate</span>
+    <span class="n">mutProb</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mutProb</span> <span class="o">&lt;</span> <span class="mf">0.95</span><span class="p">:</span> <span class="c1"># 95% chance of mutating</span>
+        <span class="n">rand_index</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="c1"># gets a random position to mutate</span>
+        <span class="n">randomNum</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">mutated</span> <span class="o">=</span> <span class="n">enc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">rand_index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">randomNum</span> <span class="o">+</span> <span class="n">enc</span><span class="p">[</span><span class="n">rand_index</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">mutated</span>
+
+    <span class="k">return</span> <span class="n">enc</span>
+
+
+<span class="c1"># takes the states and decodes the encoded states into the board</span>
+<span class="c1"># input- an array of states, the size of the board, the number of generations passed, and number of restarts</span>
+<span class="c1"># output- the board decoded with all the variables in the board and state updated</span>
+<span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">restart</span><span class="p">):</span>
+
+    <span class="c1"># will loop through all the states to both decode the strings to their proper board </span>
+    <span class="c1"># and reinitialize the fitness and non attacking pairs for recursive use</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">)):</span>
+        <span class="n">encodedStr</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getEncodedStr</span><span class="p">()</span> <span class="c1"># gets the encoded string for the current state</span>
+        <span class="n">mapEncodedStr</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">encodedStr</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> 
+        <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">fit</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># makes the fitness 0 to rest the fitness value</span>
+        <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">nonFit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">fitness</span><span class="p">()</span> <span class="c1"># calls fitness to get the current fitness value</span>
+        <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">nonFitness</span><span class="p">()</span>
+        <span class="n">Fit</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">get_fit</span><span class="p">()</span> <span class="c1"># saves the fitness to a variable</span>
+        <span class="n">nonFit</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">get_nonFit</span><span class="p">()</span>
+        <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setFit</span><span class="p">(</span><span class="n">nonFit</span><span class="p">)</span> <span class="c1"># saves the fitness value to the state</span>
+
+        <span class="k">if</span> <span class="n">Fit</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># detcts if one of the states found a solution</span>
+            <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;non Attacking Pairs: </span><span class="si">{0:}</span><span class="se">\n</span><span class="s2"># of generations: </span><span class="si">{1:}</span><span class="se">\n</span><span class="s2">total # of restarts: </span><span class="si">{2:}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nonFit</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">restart</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">return</span> <span class="n">states</span>
+
+
+<span class="c1"># maps the encoded string to the current state</span>
+<span class="c1"># input - the current state, the encoded string, the size of the board</span>
+<span class="c1"># output -  the decoded board</span>
+<span class="k">def</span> <span class="nf">mapEncodedStr</span><span class="p">(</span><span class="n">currState</span><span class="p">,</span> <span class="n">encodedStr</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="n">currState</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span> <span class="c1"># reinitializes board to all 0&#39;s</span>
+    
+    <span class="c1"># loop through the encoded string and do the following:</span>
+    <span class="c1"># 1. get the character of the current position, this is the column</span>
+    <span class="c1"># 2. the current position is the row of the board</span>
+    <span class="c1"># 3. get the board and place the queens in its row and column</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encodedStr</span><span class="p">)):</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">encodedStr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># gets the value for the column</span>
+        <span class="n">currState</span><span class="o">.</span><span class="n">board</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># places the queen in its proper row and column</span>
+
+
+<span class="c1"># randomly restarts when detects it hasnt changed</span>
+<span class="c1"># input - the states and number of repeated restarts and the number of restarts so far</span>
+<span class="c1"># output - the states (will eempty if detects a restart is needed), the probability of restarting, the number of restarts</span>
+<span class="k">def</span> <span class="nf">randomRestart</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">probOfRestart</span><span class="p">,</span> <span class="n">numofRestarts</span><span class="p">):</span>
+    <span class="n">encodedStr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">allSameState</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># goes through every state to see if every state is the same, if so there is an increase in a chance it will randomly reset</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">)):</span>
+        <span class="n">currEncoded</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getEncodedStr</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">encodedStr</span> <span class="o">=</span> <span class="n">currEncoded</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">encodedStr</span> <span class="o">==</span> <span class="n">currEncoded</span><span class="p">:</span> <span class="c1"># shows that there is a state unlike the others</span>
+                <span class="n">allSameState</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="c1"># if all the states are the same state, then will possibly restart </span>
+    <span class="k">if</span> <span class="n">allSameState</span><span class="p">:</span>
+        <span class="n">probOfRestart</span> <span class="o">+=</span> <span class="o">.</span><span class="mi">15</span>
+        <span class="n">randomReset</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">randomReset</span> <span class="o">&lt;</span> <span class="n">probOfRestart</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span> <span class="p">,</span> <span class="n">probOfRestart</span><span class="p">,</span> <span class="p">(</span><span class="n">numofRestarts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># resets the restart probability once realizing not all the states are the same</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">probOfRestart</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">return</span> <span class="n">states</span><span class="p">,</span> <span class="n">probOfRestart</span><span class="p">,</span> <span class="n">numofRestarts</span>
+
+
+<span class="c1"># runs the algorithm with its runtime</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">runningtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="c1"># keeps track of the current time</span>
+    <span class="n">geneticAlgo</span><span class="p">([],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">endtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="c1"># gets the time once the program ended</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time spent running: </span><span class="si">{0:.2f}</span><span class="s2"> ms&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">endtime</span> <span class="o">-</span> <span class="n">runningtime</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span><span class="c1"># prints the running time  </span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[[0 0 1 0 0]
+ [0 0 0 0 1]
+ [0 1 0 0 0]
+ [0 0 0 1 0]
+ [1 0 0 0 0]]
+Fitness:  0
+non Attacking Pairs: 22
+# of generations: 33
+total # of restarts: 0
+time spent running: 15.01 ms
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&#160;[&#160;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    </div>
+  </div>
+
+
+ 
+
+
+
+<script type="text/javascript" src="/d2l/common/math/MathML.js?v=20.20.9.24432-155 "></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { D2LMathML.DesktopInit('https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=MML_HTMLorMML','https://s.brightspace.com/lib/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML','130'); });</script></body></html>
